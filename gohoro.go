@@ -69,7 +69,6 @@ func main() {
 		for k, v := range signMap {
 			fmt.Println(k, "--", v)
 		}
-		fmt.Println(0, "\t", "Exit")
 		isFirst:=true
 		for signName == ""{
 			if !isFirst{
