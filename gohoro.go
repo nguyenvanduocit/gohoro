@@ -7,40 +7,39 @@ import (
 	"io/ioutil"
 	"regexp"
 	"flag"
-	"sort"
 )
 
 var endpoint string = "http://www.horoscope.com/us/horoscopes/general/horoscope-general-daily-today.aspx";
 
-var signMap = map[int]string{
-	1:"ARIES",
-	2:"TAURUS",
-	3:"GEMINI",
-	4:"CANCER",
-	5:"LEO",
-	6:"VIRGO",
-	7:"LIBRA",
-	8:"SCORPIO",
-	9:"SAGITTARIUS",
-	10:"CAPRICORN",
-	11:"AQUARIUS",
-	12:"PISCES",
+var signMap = map[string]int{
+	"ARIES":1,
+	"TAURUS":2,
+	"GEMINI":3,
+	"CANCER":4,
+	"LEO":5,
+	"VIRGO":6,
+	"LIBRA":7,
+	"SCORPIO":8,
+	"SAGITTARIUS":9,
+	"CAPRICORN":10,
+	"AQUARIUS":11,
+	"PISCES":12,
 }
 
-func GetSignId(signName string) (int, error) {
-	signName = strings.ToUpper(signName)
-	for k, v := range signMap {
-		if (v == signName) {
-			return k, nil
+func GetSignNameById(signId int) string{
+	for name,id := range signMap{
+		if(id == signId){
+			return name
 		}
 	}
-	return 0, fmt.Errorf("Sign id not found")
+	return ""
 }
 
 func GetHoroscope(signName string) (string, error) {
-	signId, err := GetSignId(signName);
-	if err != nil {
-		return "", err
+	signName = strings.ToUpper(signName)
+	signId, ok := signMap[signName];
+	if !ok {
+		return "", fmt.Errorf("I don't know anything about this sign.")
 	}
 	url := fmt.Sprintf("%s?sign=%d", endpoint, signId)
 	resp, err := http.Get(url);
@@ -67,17 +66,12 @@ func main() {
 	flag.Parse()
 	if signName == "" {
 		var signId int = -1
-		var keys []int
-		for k := range signMap {
-			keys = append(keys, k)
-		}
-		sort.Ints(keys)
-		for _, k := range keys {
-			fmt.Println(k, "\t", signMap[k])
+		for k, v := range signMap {
+			fmt.Println(k, "--", v)
 		}
 		fmt.Println(0, "\t", "Exit")
 		isFirst:=true
-		for signMap[signId] == ""{
+		for signName == ""{
 			if !isFirst{
 				fmt.Print("This sign is not exist, please type a number from the list below :")
 			}else{
@@ -88,8 +82,8 @@ func main() {
 			if signId==0{
 				return
 			}
+			signName = GetSignNameById(signId)
 		}
-		signName = signMap[signId]
 	}
 	fmt.Println("Please wait ...")
 	content, err := GetHoroscope(signName)
