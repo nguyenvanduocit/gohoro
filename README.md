@@ -1,5 +1,5 @@
 # gohoro
-Get horoscope information in golang
+For guys who crazy with horoscope. Now, you can check your daily horosope every second, just a command.
 
 # Usage
 Get :
