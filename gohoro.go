@@ -1,4 +1,4 @@
-package main
+package gohoro
 
 import (
 	"strings"
@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"io/ioutil"
 	"regexp"
-	"flag"
 )
 
 var endpoint string = "http://www.horoscope.com/us/horoscopes/general/horoscope-general-daily-today.aspx";
 
-var signMap = map[string]int{
+var SignMap = map[string]int{
 	"ARIES":1,
 	"TAURUS":2,
 	"GEMINI":3,
@@ -27,7 +26,7 @@ var signMap = map[string]int{
 }
 
 func GetSignNameById(signId int) string{
-	for name,id := range signMap{
+	for name,id := range SignMap{
 		if(id == signId){
 			return name
 		}
@@ -37,7 +36,7 @@ func GetSignNameById(signId int) string{
 
 func GetHoroscope(signName string) (string, error) {
 	signName = strings.ToUpper(signName)
-	signId, ok := signMap[signName];
+	signId, ok := SignMap[signName];
 	if !ok {
 		return "", fmt.Errorf("I don't know anything about this sign.")
 	}
@@ -52,42 +51,10 @@ func GetHoroscope(signName string) (string, error) {
 		return "", fmt.Errorf("Can not read body")
 	}
 	content := string(body)
-	r, _ := regexp.Compile("(?s)<div class=\"block-horoscope-text[^>]*\">([^/]*)</div>")
+	r := regexp.MustCompile("(?s)<div class=\"block-horoscope-text[^>]*\">([^/]*)</div>")
 	loginResultSubmatch := r.FindStringSubmatch(content)
 	if loginResultSubmatch == nil {
 		return "", fmt.Errorf("Can not read data.")
 	}
 	return strings.TrimSpace(loginResultSubmatch[1]), nil
-}
-
-func main() {
-	var signName string
-	flag.StringVar(&signName, "sign", "", "Sign name")
-	flag.Parse()
-	if signName == "" {
-		var signId int = -1
-		for k, v := range signMap {
-			fmt.Println(k, "--", v)
-		}
-		isFirst:=true
-		for signName == ""{
-			if !isFirst{
-				fmt.Print("This sign is not exist, please type a number from the list below :")
-			}else{
-				isFirst = false;
-				fmt.Print("Please choose a horoscope (number):")
-			}
-			fmt.Scanf("%d", &signId)
-			if signId==0{
-				return
-			}
-			signName = GetSignNameById(signId)
-		}
-	}
-	fmt.Println("Please wait ...")
-	content, err := GetHoroscope(signName)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(content)
 }
